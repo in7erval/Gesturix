@@ -4,11 +4,11 @@ import mediapipe as mp
 import numpy
 from config import logger
 
-from CVFpsCalc import CvFpsCalc
 from classifier.GestureClassifier import GestureClassifier
 from mongo_api import save_landmarks_to_db
-from saved_images.save_gesture_utils import save_gesture_to_csv
-from utils import detect_hand_landmarks, write_image_to_file, convert_pad_point_to_screen_point
+from old_version.save_gesture_utils import save_gesture_to_csv
+from utils.CVFpsCalc import CvFpsCalc
+from utils.utils import detect_hand_landmarks, write_image_to_file, convert_pad_point_to_screen_point
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -215,7 +215,7 @@ if __name__ == '__main__':
             break
         elif k == ord('s'):
             logger.info('saved image')
-            write_image_to_file(frame, dir='saved_images')
+            write_image_to_file(frame, dir='../saved_images')
         # ======= default end =====
         # ======= class start =====
         elif k == ord(','):

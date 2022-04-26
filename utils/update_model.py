@@ -10,8 +10,8 @@ from sklearn.model_selection import train_test_split
 
 RANDOM_SEED = 42
 dataset = 'gestures.csv'
-model_save_path = 'gestures_classifier_test.hdf5'
-tflite_save_path = 'gestures_classifier_test.tflite'
+model_save_path = '../data/gestures_classifier_test.hdf5'
+tflite_save_path = '../data/gestures_classifier_test.tflite'
 NUM_CLASSES = 3
 
 

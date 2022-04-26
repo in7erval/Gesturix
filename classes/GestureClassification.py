@@ -5,9 +5,9 @@ import cv2
 import mediapipe as mp
 import numpy
 
-from CVFpsCalc import CvFpsCalc
 from classes.AppRunInterface import AppRunInterface
 from classifier.GestureClassifier import GestureClassifier
+from utils.CVFpsCalc import CvFpsCalc
 
 SHAKE_CURSOR_RANGE = 5
 FPS_COLOR = (229, 43, 80)

@@ -3,8 +3,6 @@ import datetime
 import certifi
 import pymongo
 
-from config import logger
-
 ca = certifi.where()
 
 client = pymongo.MongoClient(
@@ -12,8 +10,6 @@ client = pymongo.MongoClient(
     ssl=True, tlsCAFile=ca)
 db = client.diploma
 keypoints_collection = db.keypoints
-
-logger.debug(f"{client=}")
 
 
 def landmarks_to_document(landmark):

@@ -8,7 +8,7 @@ import numpy
 from classes.AppRunInterface import AppRunInterface
 from classes.GestureClassification import GestureClassification
 from classes.GesturesTraining import GesturesTraining
-from utils import detect_hand_landmarks
+from utils.utils import detect_hand_landmarks
 
 
 def get_args():
