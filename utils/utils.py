@@ -4,7 +4,6 @@ from typing import NamedTuple
 
 import cv2
 import mediapipe as mp
-import numpy
 import numpy as np
 
 mp_drawing = mp.solutions.drawing_utils
@@ -29,28 +28,11 @@ def detect_hand_landmarks(image: np.array, hands: mp.solutions.hands.Hands) -> (
     results = hands.process(imgRGB)
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
-            # logger.debug(
-            #     f'Index finger tip coordinate: ('
-            #     f'{int(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width)}, '
-            #     f'{int(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height)})'
-            # )
             mp_drawing.draw_landmarks(image=output_image,
                                       landmark_list=hand_landmarks,
                                       connections=mp_hands.HAND_CONNECTIONS,
                                       landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
                                       connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style())
-    # if display:
-    #     plt.figure(figsize=[15, 15])
-    #     plt.subplot(121)
-    #     plt.imshow(image[:, :, ::-1])
-    #     plt.title("Original image")
-    #     plt.axis("off")
-    #     plt.subplot(122)
-    #     plt.imshow(output_image[:, :, ::-1])
-    #     plt.title("Processed image")
-    #     plt.axis('off')
-    #     plt.show()
-    # else:
     return output_image, results
 
 
@@ -81,24 +63,10 @@ def convert_pad_point_to_screen_point(pad_point: tuple, pad_width: int, pad_heig
     return pad_point[0] * scale_x, pad_point[1] * scale_y
 
 
-def process_data_from_camera(hands, frame: numpy.ndarray, detect_landmarks: bool = False) -> (numpy.ndarray,):
-    """
-    Reads frame from camera and/or draws hand landmarks
-    :param hands:
-    :param frame:
-    :rtype: (numpy.ndarray, tuple)
-    :param detect_landmarks: is it necessary to detect and draw hand landmarks?
-    :return: new frame
-    """
-
-    frame = cv2.flip(frame, 1)
-    hand_landmarks = None
-
-    if detect_landmarks:
-        frame, results = detect_hand_landmarks(frame, hands)
-        # if WRITE_TO_MONGO:
-        #     save_landmarks_to_db(results)
-        if results and results.multi_hand_landmarks:
-            hand_landmarks = next(iter(results.multi_hand_landmarks))
-
-    return frame, hand_landmarks
+def landmarks_to_plain_list(hand_landmarks):
+    coordinates = []
+    if hand_landmarks:
+        for i in range(0, 21):
+            landmark = hand_landmarks.landmark[i]
+            coordinates.extend([landmark.x, landmark.y])
+    return coordinates

@@ -6,8 +6,10 @@ import mediapipe as mp
 import numpy
 
 from classes.AppRunInterface import AppRunInterface
+from classes.DynamicBuffer import DynamicBuffer
 from classifier.GestureClassifier import GestureClassifier
 from utils.CVFpsCalc import CvFpsCalc
+from utils.utils import landmarks_to_plain_list
 
 SHAKE_CURSOR_RANGE = 5
 FPS_COLOR = (229, 43, 80)
@@ -44,7 +46,8 @@ class GestureClassification(AppRunInterface):
     def __init__(self,
                  hands,
                  camera: cv2.VideoCapture,
-                 scale_factor: float = 0.5):
+                 scale_factor: float = 0.5,
+                 buffer_size: int = 10):
         self.prev_screen_point = None
         self.finger_coords = None
         self.prev_click = None
@@ -60,11 +63,14 @@ class GestureClassification(AppRunInterface):
         self.shift_y = int(self.screen_height * (1 - scale_factor) // 2)
         self.pad_width = int(self.screen_width * self.scale_factor)
         self.pad_height = int(self.screen_height * self.scale_factor)
+        self.buffer = DynamicBuffer(buffer_size)
         self.gestures_classifier = GestureClassifier()
 
     def __call__(self, frame, hand_landmarks):
         fps = self.cvFpsCalc.get()
         frame = self.draw_pad(frame)
+
+        self.buffer.save(landmarks_to_plain_list(hand_landmarks))
 
         self.hand_landmarks = hand_landmarks
         cv2.putText(frame, 'FPS: {}'.format(fps),
@@ -81,6 +87,8 @@ class GestureClassification(AppRunInterface):
         if hand_landmarks:
             landmarks_to_classify = pre_process_landmark(hand_landmarks)
 
+            # if self.buffer.is_full():
+            # dynamic_gesture_num = self.dynamic_gestures_classifier(self.buffer.get())
             gesture_num = self.gestures_classifier(landmarks_to_classify) + 1
             if gesture_num != self.prev_click:
                 if self.prev_click == 2:
@@ -110,7 +118,6 @@ class GestureClassification(AppRunInterface):
         return frame
 
     def parse_keyboard(self, key):
-        # ======= class start =====
         if key == ord(','):
             self.scale_factor -= 0.05
             self.pad_width = int(self.screen_width * self.scale_factor)
@@ -146,7 +153,7 @@ class GestureClassification(AppRunInterface):
         if self.prev_screen_point and distance(self.prev_screen_point, screen_point) > SHAKE_CURSOR_RANGE:
             try:
                 autopy.mouse.move(*screen_point)
-            except ValueError as ignored:
+            except ValueError:
                 pass
         self.prev_screen_point = screen_point
 
