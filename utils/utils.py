@@ -70,3 +70,14 @@ def landmarks_to_plain_list(hand_landmarks):
             landmark = hand_landmarks.landmark[i]
             coordinates.extend([landmark.x, landmark.y])
     return coordinates
+
+
+def relativize(arr: np.array, to: int = 0, rng: int = 2):
+    """
+    Relativize every {rng} elems of array by subtracting it from arr[to:range]
+    """
+    if type(arr) is not np.ndarray:
+        arr = np.array(arr, dtype=np.float)
+    for i in range(rng):
+        arr[to + i::rng] -= arr[to + i]
+    return arr

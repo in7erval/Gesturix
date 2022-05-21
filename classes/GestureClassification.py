@@ -9,7 +9,7 @@ from classes.AppRunInterface import AppRunInterface
 from classes.DynamicBuffer import DynamicBuffer
 from classifier.GestureClassifier import GestureClassifier
 from utils.CVFpsCalc import CvFpsCalc
-from utils.utils import landmarks_to_plain_list
+from utils.utils import landmarks_to_plain_list, relativize
 
 SHAKE_CURSOR_RANGE = 5
 FPS_COLOR = (229, 43, 80)
@@ -88,8 +88,9 @@ class GestureClassification(AppRunInterface):
             landmarks_to_classify = pre_process_landmark(hand_landmarks)
 
             if self.buffer.is_full():
-                dynamic_gesture_num, ver = self.dynamic_gestures_classifier(self.buffer.get())
-                self.logger.info(f'Dynamic gesture found! Gesture_num: {dynamic_gesture_num} {ver}')
+                dynamic_gesture_num, ver = self.dynamic_gestures_classifier(relativize(self.buffer.get()))
+                if dynamic_gesture_num != 2:
+                    self.logger.info(f'Dynamic gesture found! Gesture_num: {dynamic_gesture_num} {ver}')
             gesture_num, _ = self.gestures_classifier(landmarks_to_classify)
             gesture_num += 1
             if gesture_num != self.prev_click:

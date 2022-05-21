@@ -36,7 +36,7 @@ def save_gesture_to_csv(fname, gesture_num, hand_landmarks):
 
 def save_gesture_sequence_to_csv(fname, gesture_num, gesture_sequence):
     with open(fname, 'a+') as f:
-        coords_str = " | ".join(map(str, gesture_sequence))
+        coords_str = ";".join(map(str, gesture_sequence))
         if coords_str:
             f.write(f"{gesture_num} | {coords_str}\n")
 
@@ -94,8 +94,13 @@ class GesturesTraining(AppRunInterface):
         frame_height = frame.shape[0]
         frame_width = frame.shape[1]
         cv2.rectangle(frame, (0, 0), (frame_width, 50), (200, 200, 200), thickness=-1)
-        cv2.putText(frame, f'{self.create_gestures_string()}', (10, 20),
-                    cv2.FONT_HERSHEY_PLAIN, 1.25, ALL_GESTURES_INFO_COLOR, 2)
+        gestures_str = self.create_gestures_string()
+        if len(gestures_str) == 0:
+            cv2.putText(frame, 'No data available', (10, 20),
+                        cv2.FONT_HERSHEY_PLAIN, 1.25, ALL_GESTURES_INFO_COLOR, 2)
+        else:
+            cv2.putText(frame, f'{gestures_str}', (10, 20),
+                        cv2.FONT_HERSHEY_PLAIN, 1.25, ALL_GESTURES_INFO_COLOR, 2)
         cv2.putText(frame, f"Gesture = '{self.gesture_to_save}' {self.mode}",
                     (10, 45), cv2.FONT_HERSHEY_PLAIN, 1.25, CURRENT_GESTURE_INFO_COLOR, 2)
         cv2.rectangle(frame, (0, frame_height - 70), (frame_width, frame_height), (200, 200, 200), thickness=-1)
@@ -153,7 +158,7 @@ class GesturesTraining(AppRunInterface):
     def load_gestures(self):
         self.saved_gestures_dict = {}
         load_gestures_from_csv(self.saved_gestures_dict, self.filename)
-        load_gestures_from_csv(self.saved_gestures_dict, self.filename_seq, delim=' | ')
+        load_gestures_from_csv(self.saved_gestures_dict, self.filename_seq, delim=';')
         self.logger.info('Gestures dict loaded')
         self.logger.debug(f'{self.saved_gestures_dict}')
 

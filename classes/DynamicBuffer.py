@@ -1,9 +1,13 @@
+import logging
+
+
 class DynamicBuffer:
 
     def __init__(self, buffer_size=10):
         self.__buffer_size = buffer_size
         self.__current_size = 0
         self.__buffer = []
+        logging.getLogger().debug(f'Allocated DynamicBuffer with size={buffer_size}')
 
     def save(self, data):
         if data:
