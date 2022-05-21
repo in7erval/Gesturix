@@ -26,4 +26,7 @@ class GestureClassifier(object):
 
         result_index = np.argmax(np.squeeze(result))
 
-        return result_index
+        return result_index, np.squeeze(result)
+
+    def get_input_shape(self):
+        return self.input_details[0]['shape']

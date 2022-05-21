@@ -41,29 +41,19 @@ def save_gesture_sequence_to_csv(fname, gesture_num, gesture_sequence):
             f.write(f"{gesture_num} | {coords_str}\n")
 
 
-def load_gestures_from_csv(fname, fname_seq):
-    d = {}
+def load_gestures_from_csv(where_to_load: dict, fname, delim=','):
     try:
         with open(fname, 'r') as f:
             for line in f.readlines():
-                gesture_num = int(line.split(',', 1)[0])
-                if gesture_num in d.keys():
-                    d[gesture_num] += 1
+                gesture_num = line.split(delim, 1)[0]
+                if gesture_num.isdigit():
+                    gesture_num = int(gesture_num)
+                if gesture_num in where_to_load.keys():
+                    where_to_load[gesture_num] += 1
                 else:
-                    d[gesture_num] = 1
+                    where_to_load[gesture_num] = 1
     except FileNotFoundError:
-        logging.getLogger().warning(f'{fname} not found, skip loading static gestures.')
-    try:
-        with open(fname_seq, 'r') as f:
-            for line in f.readlines():
-                gesture_num = line.split(' | ', 1)[0]
-                if gesture_num in d.keys():
-                    d[gesture_num] += 1
-                else:
-                    d[gesture_num] = 1
-    except FileNotFoundError:
-        logging.getLogger().warning(f'{fname_seq} not found, skip loading sequential gestures.')
-    return d
+        logging.getLogger().warning(f'{fname} not found, skip loading gestures.')
 
 
 class GesturesTraining(AppRunInterface):
@@ -161,7 +151,9 @@ class GesturesTraining(AppRunInterface):
                 self.gesture_sequence.append(landmarks_to_plain_list(self.hand_landmarks))
 
     def load_gestures(self):
-        self.saved_gestures_dict = load_gestures_from_csv(self.filename, self.filename_seq)
+        self.saved_gestures_dict = {}
+        load_gestures_from_csv(self.saved_gestures_dict, self.filename)
+        load_gestures_from_csv(self.saved_gestures_dict, self.filename_seq, delim=' | ')
         self.logger.info('Gestures dict loaded')
         self.logger.debug(f'{self.saved_gestures_dict}')
 

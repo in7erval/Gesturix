@@ -46,8 +46,7 @@ class GestureClassification(AppRunInterface):
     def __init__(self,
                  hands,
                  camera: cv2.VideoCapture,
-                 scale_factor: float = 0.5,
-                 buffer_size: int = 10):
+                 scale_factor: float = 0.5):
         self.prev_screen_point = None
         self.finger_coords = None
         self.prev_click = None
@@ -63,8 +62,9 @@ class GestureClassification(AppRunInterface):
         self.shift_y = int(self.screen_height * (1 - scale_factor) // 2)
         self.pad_width = int(self.screen_width * self.scale_factor)
         self.pad_height = int(self.screen_height * self.scale_factor)
-        self.buffer = DynamicBuffer(buffer_size)
         self.gestures_classifier = GestureClassifier()
+        self.dynamic_gestures_classifier = GestureClassifier(model_path='data/gestures_sequence_classifier.tflite')
+        self.buffer = DynamicBuffer(buffer_size=self.dynamic_gestures_classifier.get_input_shape()[1])
 
     def __call__(self, frame, hand_landmarks):
         fps = self.cvFpsCalc.get()
@@ -87,9 +87,11 @@ class GestureClassification(AppRunInterface):
         if hand_landmarks:
             landmarks_to_classify = pre_process_landmark(hand_landmarks)
 
-            # if self.buffer.is_full():
-            # dynamic_gesture_num = self.dynamic_gestures_classifier(self.buffer.get())
-            gesture_num = self.gestures_classifier(landmarks_to_classify) + 1
+            if self.buffer.is_full():
+                dynamic_gesture_num, ver = self.dynamic_gestures_classifier(self.buffer.get())
+                self.logger.info(f'Dynamic gesture found! Gesture_num: {dynamic_gesture_num} {ver}')
+            gesture_num, _ = self.gestures_classifier(landmarks_to_classify)
+            gesture_num += 1
             if gesture_num != self.prev_click:
                 if self.prev_click == 2:
                     autopy.mouse.toggle(button=autopy.mouse.Button.LEFT, down=False)

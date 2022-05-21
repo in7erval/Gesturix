@@ -46,7 +46,7 @@ def write_image_to_file(image, filename=None, dir=None):
 
     if filename is None:
         filename = f'image{time.strftime("%Y-%m-%d_%H:%M:%S")}.jpg'
-    curr_dir = os.path.dirname(__file__)
+    curr_dir = os.path.dirname(__package__)
     if dir is not None:
         dir = os.path.join(curr_dir, dir)
         if not os.path.exists(dir):

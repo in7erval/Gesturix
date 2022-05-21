@@ -9,12 +9,12 @@ class DynamicBuffer:
         if data:
             self.__buffer.append(data)
             self.__current_size += 1
-            if len(self.__buffer) > self.__buffer_size:
+            if self.__current_size > self.__buffer_size:
                 self.__buffer.pop(0)
                 self.__current_size = self.__buffer_size
 
     def is_full(self):
-        return len(self.__buffer) == self.__buffer_size
+        return self.__current_size == self.__buffer_size
 
     def clear(self):
         self.__buffer = []

@@ -8,7 +8,9 @@ import numpy
 from classes.AppRunInterface import AppRunInterface
 from classes.GestureClassification import GestureClassification
 from classes.GesturesTraining import GesturesTraining
-from utils.utils import detect_hand_landmarks
+from classes.utils.DiplomaVision import DiplomaVision
+from classes.utils.FakeCamera import FakeCamera
+from utils.utils import detect_hand_landmarks, write_image_to_file
 
 
 def get_args():
@@ -31,6 +33,11 @@ def get_args():
                         type=float,
                         default=0.5)
 
+    parser.add_argument('--static_mode', '-sm', action='store_true', default=False,
+                        help='Secret mode for Diploma')
+    parser.add_argument('--image_for_static_mode', '-i', type=str, default='',
+                        help='Image for secret mode for Diploma')
+
     return parser.parse_args()
 
 
@@ -39,9 +46,16 @@ class App:
         logging.basicConfig(level=logging.DEBUG)
         self.logger = logging.getLogger()
         self.args = get_args()
+
+        if self.args.static_mode:
+            self.args.use_static_image_mode = True
+            self.hands = self.get_hands()
+            self.camera = FakeCamera(self.args.image_for_static_mode)
+            self.run_class: AppRunInterface = DiplomaVision(self.hands, self.args.image_for_static_mode)
+            return
+
         self.hands = self.get_hands()
         self.camera = self.get_camera()
-
         if self.args.learning_mode:
             self.logger.info("Learning mode is activated!")
             self.run_class: AppRunInterface = GesturesTraining(self.hands,
@@ -70,12 +84,12 @@ class App:
         cv2.namedWindow('Hands Landmarks Detection', cv2.WINDOW_NORMAL)
 
         while self.camera.isOpened():
-            ok, frame = self.camera.read()
+            ok, first_frame = self.camera.read()
             if not ok:
                 self.logger.error('not opened')
                 continue
 
-            frame, hand_landmarks = self.process_data_from_camera(frame, detect_landmarks=True)
+            frame, hand_landmarks = self.process_data_from_camera(first_frame.copy(), detect_landmarks=True)
 
             frame = self.run_class(frame, hand_landmarks)
 
@@ -88,6 +102,8 @@ class App:
             if key == 27 or key == ord('q'):
                 self.logger.info('STOP application')
                 break
+            elif key == ord('b'):
+                write_image_to_file(first_frame, dir='saved_images')
 
         self.camera.release()
         cv2.destroyAllWindows()
