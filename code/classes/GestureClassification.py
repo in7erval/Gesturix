@@ -87,31 +87,15 @@ class GestureClassification(AppRunInterface):
         if hand_landmarks:
             landmarks_to_classify = pre_process_landmark(hand_landmarks)
 
-            if self.buffer.is_full():
-                dynamic_gesture_num, ver = self.dynamic_gestures_classifier(relativize(self.buffer.get()))
-                if dynamic_gesture_num != 2:
-                    self.logger.info(f'Dynamic gesture found! Gesture_num: {dynamic_gesture_num} {ver}')
+            # if self.buffer.is_full():
+            #     dynamic_gesture_num, ver = self.dynamic_gestures_classifier(relativize(self.buffer.get()))
+            #     if dynamic_gesture_num != 2:
+            #         self.logger.info(f'Dynamic gesture found! Gesture_num: {dynamic_gesture_num} {ver}')
             gesture_num, _ = self.gestures_classifier(landmarks_to_classify)
             gesture_num += 1
-            if gesture_num != self.prev_click:
-                if self.prev_click == 2:
-                    autopy.mouse.toggle(button=autopy.mouse.Button.LEFT, down=False)
-                    self.logger.debug('Left button toggle up')
-                elif self.prev_click == 3:
-                    autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT, down=False)
-                    self.logger.debug('Right button toggle up')
-
-                if gesture_num == 2:
-                    self.prev_click = 2
-                    autopy.mouse.toggle(button=autopy.mouse.Button.LEFT, down=True)
-                    self.logger.debug('Left button toggle down')
-                elif gesture_num == 3:
-                    self.prev_click = 3
-                    autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT, down=True)
-                    self.logger.debug('Right button toggle down')
             cv2.putText(frame, f'GESTURE_NUM = {gesture_num}',
                         (10, 45), cv2.FONT_HERSHEY_PLAIN, 1.25, GESTURE_INFO_COLOR, 2)
-            self.prev_click = gesture_num
+            self.action(gesture_num)
         else:
             if self.prev_click == 2:
                 autopy.mouse.toggle(button=autopy.mouse.Button.LEFT, down=False)
@@ -119,6 +103,27 @@ class GestureClassification(AppRunInterface):
                 autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT, down=False)
             self.prev_click = None
         return frame
+
+    def action(self, gesture_num):
+        if gesture_num != self.prev_click:
+            if self.prev_click == 2:
+                autopy.mouse.toggle(button=autopy.mouse.Button.LEFT, down=False)
+                self.logger.debug('Left button toggle up')
+            elif self.prev_click == 3:
+                autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT, down=False)
+                self.logger.debug('Right button toggle up')
+
+            if gesture_num == 2:
+                self.prev_click = 2
+                autopy.mouse.toggle(button=autopy.mouse.Button.LEFT, down=True)
+                self.logger.debug('Left button toggle down')
+            elif gesture_num == 3:
+                self.prev_click = 3
+                autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT, down=True)
+                self.logger.debug('Right button toggle down')
+
+        self.prev_click = gesture_num
+
 
     def parse_keyboard(self, key):
         if key == ord(','):
