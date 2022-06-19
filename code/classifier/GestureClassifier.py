@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class GestureClassifier(object):
     def __init__(self,
-                 model_path='data/addons/gestures_classifier_dataset_all.tflite',
+                 model_path='data/gestures_classifier.tflite',
                  num_threads=1):
         self.interpreter = tf.lite.Interpreter(model_path=model_path,
                                                num_threads=num_threads)

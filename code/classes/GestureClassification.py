@@ -70,7 +70,7 @@ class GestureClassification(AppRunInterface):
         fps = self.cvFpsCalc.get()
         frame = self.draw_pad(frame)
 
-        self.buffer.save(landmarks_to_plain_list(hand_landmarks))
+        # self.buffer.save(landmarks_to_plain_list(hand_landmarks))
 
         self.hand_landmarks = hand_landmarks
         cv2.putText(frame, 'FPS: {}'.format(fps),
